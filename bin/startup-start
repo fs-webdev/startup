@@ -25,6 +25,8 @@ program
   .option('-d, --dev', 'run in development mode')
   .option('--debug', 'run the debugger')
   .option('--debug-brk', 'run the debugger with a break on start')
+  .option('--inspect', 'run the debugger')
+  .option('--inspect-brk', 'run the debugger with a break on start')
   .option('--node-inspector', 'run node-debug to enable debugging in the browser')
   .option('--use-strict', 'use strict mode')
   // .option('-s, --shutdown <shutdown>', 'server shutdown timeout')
@@ -94,10 +96,12 @@ if (program.port) process.env.PORT = program.port;
  * run in debug mode
  */
 
-if (program.debug || program.debugBrk) {
-  var debug = program.debug
-    ? '--debug'
-    : '--debug-brk';
+if (program.debug || program.debugBrk || program.inspect || program.inspectBrk) {
+  var debug = "";
+  if(program.debug) debug = '--debug';
+  if(program.inspect) debug = '--inspect';
+  if(program.debugBrk) debug = '--debug-brk';
+  if(program.inspectBrk) debug = '--inspect-brk';
 
   // setup the arguments
   var args = [
