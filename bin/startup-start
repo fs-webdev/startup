@@ -70,7 +70,7 @@ var path = utils.resolve(program.app || program.path);
  * resolve the runner path
  */
 
-var runner = resolve(__dirname, '../lib/runner');
+var runner = resolve(__dirname, '../lib/runner.js');
 
 /**
  * make sure the app exists
@@ -145,7 +145,7 @@ if (program.nodeInspector) {
 if (program.dev || process.env.NODE_ENV === 'development') {
   utils.log('info', 'auto-reload enabled');
 
-  var cmd = process.env.STARTUP_DEV_SCRIPT || require.resolve('node-dev/bin/node-dev');
+  var cmd = process.env.STARTUP_DEV_SCRIPT || require.resolve('nodemon/bin/nodemon');
 
   var args = [
     runner,
