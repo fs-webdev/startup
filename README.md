@@ -187,3 +187,8 @@ SIGTERM and SIGINT
 ------------------
 
 `startup` reacts to system messages to enable clean exits. When it receives a SIGTERM it stops accepting connections and gives all of the current connections 3 seconds (overridable by setting SOCKET_TIMEOUT) to clean up and shut down. In environments like heroku it is very important the server reacts to these messages since the platform can shut it down at any time.
+
+TOOBUSY, PROTECTION FROM LAG
+-------
+
+[toobusy-js](https://github.com/STRML/node-toobusy/) - If you want lag circuit-breaker protection for your app, startup supports that via `toobusy-js` as an optional dependency. Just `npm install toobusy-js` in your project root, and be sure you set a `TOOBUSY_LAG` greater than `10` (ms) in your app ENV. `toobusy` will then start short-circuiting new inbound connections with a `503` instead of getting slower and sicker. Tune this threshold carefully, and let your team know about the new 503 behavior, since you will now get more 503's any time your app or it's upstreams slow down.
