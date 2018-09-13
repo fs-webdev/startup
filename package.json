@@ -36,10 +36,10 @@
     "win-fork": "~1.1.1"
   },
   "devDependencies": {
-    "should": "~1.2.1",
-    "mocha": "~1.8.1",
-    "express": "~3.1.0",
-    "connect": "~2.7.2",
-    "ejs": "~0.8.3"
+    "connect": "^3.6.6",
+    "ejs": "^2.6.1",
+    "express": "^4.16.3",
+    "mocha": "^5.2.0",
+    "should": "^13.2.3"
   }
 }
