@@ -3,6 +3,14 @@ startup
 
 Node.js HTTP app runner
 
+Adding flags
+---------
+
+Here is an example of a Procfile entry with custom flags:
+```
+web: ./node_modules/.bin/startup start -w 1 --max_old_space_size=960
+```
+
 Features
 --------
 
