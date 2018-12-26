@@ -15,11 +15,21 @@ var dirname = require('path').dirname;
 var resolve = require('path').resolve;
 var exists = fs.existsSync;
 
+var debug = function nopDebug(msg){};
+
+if (process.env.DEBUG_STARTUP === 'true') {
+  debug = function debug(msg) {
+    console.log(msg);
+  };
+}
+
+
 /**
  * options
  */
 
 program
+  .allowUnknownOption(true) // allow unspecified node args
   .option('-a, --app <path>', 'path to the application file')
   .option('-p, --path <path>', 'path to the application file (deprecated)')
   .option('-d, --dev', 'run in development mode')
@@ -58,7 +68,8 @@ program.on('--help', function(){
  * parse argv
  */
 
-program.parse(process.argv);
+var result = program.parseOptions(process.argv);
+var passAlongArgs = result.unknown;
 
 /**
  * resolve the app path
@@ -110,6 +121,11 @@ if (program.debug || program.debugBrk || program.inspect || program.inspectBrk) 
     path
   ];
 
+  // pass unspecified argv values to node
+  if (passAlongArgs) {
+    args.unshift.apply(args, passAlongArgs);
+  }
+
   if (strict) args.unshift(strict);
 
   var proc = spawn('node', args, { stdio: 'inherit', customFds: [0, 1, 2] });
@@ -152,6 +168,11 @@ if (program.dev || process.env.NODE_ENV === 'development') {
     path
   ];
 
+  // pass unspecified argv values to node
+  if (passAlongArgs) {
+    args.unshift.apply(args, passAlongArgs);
+  }
+
   if (strict) args.unshift(strict);
 
   var proc = spawn(cmd, args, { stdio: 'inherit', customFds: [0, 1, 2] });
@@ -170,6 +191,11 @@ var args = [
 ];
 
 if (strict) args.unshift(strict);
+
+// pass unspecified argv values to node
+if (passAlongArgs) {
+  args.unshift.apply(args, passAlongArgs);
+}
 
 cluster.setupMaster({
   exec: runner,
@@ -190,6 +216,8 @@ for (var i = 0; i < program.workers; i++) {
  */
 
 cluster.on('disconnect', function(worker) {
+  debug("CLUSTER DISCONNECT (" + worker.id + ")");
+
   // if we are shutting down ourselves or the cluster hasn't started yet don't do anything
   if (cluster.disconnecting || !worker.started) return;
 
@@ -201,7 +229,45 @@ cluster.on('disconnect', function(worker) {
  */
 
 cluster.on('listening', function(worker, address) {
+  var msg = "CLUSTER LISTENING";
+  if (worker && worker.id !== undefined) {
+    msg += " id=" + worker.id;
+  }
+  debug(msg);
+
   worker.started = true;
+});
+
+cluster.on('exit', function(worker, code, signal) {
+  var msg = "CLUSTER EXIT";
+  if (worker && worker.id !== undefined) {
+    msg += " id=" + worker.id;
+  }
+  if (code !== 0) {
+    msg += " error code=" + code;
+  }
+  if (signal) {
+    msg += " killed by signal=" + signal;
+  }
+
+  debug(msg);
+});
+
+cluster.on('message', function(worker, message, handle) {
+  if (arguments.length === 2) {
+    handle = message;
+    message = worker;
+    worker = undefined;
+  }
+
+  var msg = "CLUSTER MESSAGE";
+  if (worker && worker.id !== undefined) {
+    msg += " id=" + worker.id;
+  }
+  if (message) {
+    msg += " msg=" + message;
+  }
+  debug(msg)
 });
 
 /**
