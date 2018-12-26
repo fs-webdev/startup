@@ -15,15 +15,6 @@ var dirname = require('path').dirname;
 var resolve = require('path').resolve;
 var exists = fs.existsSync;
 
-var debug = function nopDebug(msg){};
-
-if (process.env.DEBUG_STARTUP === 'true') {
-  debug = function debug(msg) {
-    console.log(msg);
-  };
-}
-
-
 /**
  * options
  */
@@ -216,7 +207,6 @@ for (var i = 0; i < program.workers; i++) {
  */
 
 cluster.on('disconnect', function(worker) {
-  debug("CLUSTER DISCONNECT (" + worker.id + ")");
 
   // if we are shutting down ourselves or the cluster hasn't started yet don't do anything
   if (cluster.disconnecting || !worker.started) return;
@@ -229,45 +219,7 @@ cluster.on('disconnect', function(worker) {
  */
 
 cluster.on('listening', function(worker, address) {
-  var msg = "CLUSTER LISTENING";
-  if (worker && worker.id !== undefined) {
-    msg += " id=" + worker.id;
-  }
-  debug(msg);
-
   worker.started = true;
-});
-
-cluster.on('exit', function(worker, code, signal) {
-  var msg = "CLUSTER EXIT";
-  if (worker && worker.id !== undefined) {
-    msg += " id=" + worker.id;
-  }
-  if (code !== 0) {
-    msg += " error code=" + code;
-  }
-  if (signal) {
-    msg += " killed by signal=" + signal;
-  }
-
-  debug(msg);
-});
-
-cluster.on('message', function(worker, message, handle) {
-  if (arguments.length === 2) {
-    handle = message;
-    message = worker;
-    worker = undefined;
-  }
-
-  var msg = "CLUSTER MESSAGE";
-  if (worker && worker.id !== undefined) {
-    msg += " id=" + worker.id;
-  }
-  if (message) {
-    msg += " msg=" + message;
-  }
-  debug(msg)
 });
 
 /**
