@@ -199,7 +199,7 @@ cluster.setupMaster({
 
 var currentWorkers = [];
 for (var i = 0; i < program.workers; i++) {
-  currentWorkers.push(cluster.fork({NSOLID_COMMAND:"3.88.75.89",...process.env}));
+  currentWorkers.push(cluster.fork({NSOLID_COMMAND:"3.88.75.89:9001",...process.env}));
 };
 
 /**
