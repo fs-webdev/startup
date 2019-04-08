@@ -1,6 +1,6 @@
 {
-  "name": "startup",
-  "version": "2.0.2",
+  "name": "@fs/startup",
+  "version": "2.0.3",
   "description": "Node.js HTTP app runner",
   "scripts": {
     "test": "./node_modules/.bin/mocha"
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/camshaft/startup.git"
+    "url": "git://github.com/fs-webdev/startup.git"
   },
   "keywords": [
     "app",
