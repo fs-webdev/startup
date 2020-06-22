@@ -40,7 +40,7 @@ program
  * examples
  */
 
-program.on('--help', function(){
+program.on('--help', function () {
   console.log('  Examples:');
   console.log();
   console.log('    # default settings');
@@ -98,10 +98,10 @@ if (program.port) process.env.PORT = program.port;
 
 if (program.debug || program.debugBrk || program.inspect || program.inspectBrk) {
   var debug = "";
-  if(program.debug) debug = '--debug';
-  if(program.inspect) debug = '--inspect';
-  if(program.debugBrk) debug = '--debug-brk';
-  if(program.inspectBrk) debug = '--inspect-brk';
+  if (program.debug) debug = '--debug';
+  if (program.inspect) debug = '--inspect';
+  if (program.debugBrk) debug = '--debug-brk';
+  if (program.inspectBrk) debug = '--inspect-brk';
 
   // setup the arguments
   var args = [
@@ -114,7 +114,7 @@ if (program.debug || program.debugBrk || program.inspect || program.inspectBrk) 
 
   var proc = spawn('node', args, { stdio: 'inherit', customFds: [0, 1, 2] });
 
-  return proc.on('close', function(code){
+  return proc.on('close', function (code) {
     process.exit(code);
   });
 }
@@ -133,7 +133,7 @@ if (program.nodeInspector) {
 
   var proc = spawn('node-debug', args, { stdio: 'inherit', customFds: [0, 1, 2] });
 
-  return proc.on('close', function(code){
+  return proc.on('close', function (code) {
     process.exit(code);
   });
 }
@@ -156,7 +156,7 @@ if (program.dev || process.env.NODE_ENV === 'development') {
 
   var proc = spawn(cmd, args, { stdio: 'inherit', customFds: [0, 1, 2] });
 
-  return proc.on('close', function(code){
+  return proc.on('close', function (code) {
     process.exit(code);
   });
 }
@@ -179,7 +179,7 @@ cluster.setupMaster({
 /**
  * spin up worker processes
  */
-
+console.log('starting workers', program.workers, cluster.isMaster)
 var currentWorkers = [];
 for (var i = 0; i < program.workers; i++) {
   currentWorkers.push(cluster.fork(process.env));
@@ -189,7 +189,8 @@ for (var i = 0; i < program.workers; i++) {
  * handle worker disconnects
  */
 
-cluster.on('disconnect', function(worker) {
+cluster.on('disconnect', function (worker) {
+  console.log('worker disconnecting', worker.id)
   // if we are shutting down ourselves or the cluster hasn't started yet don't do anything
   if (cluster.disconnecting || !worker.started) return;
 
@@ -200,7 +201,8 @@ cluster.on('disconnect', function(worker) {
  * mark a worker as listening
  */
 
-cluster.on('listening', function(worker, address) {
+cluster.on('listening', function (worker, address) {
+  console.log('worker is listening', address, worker.id)
   worker.started = true;
 });
 
@@ -212,7 +214,8 @@ process.once('SIGTERM', handleSignal('SIGTERM'));
 process.once('SIGINT', handleSignal('SIGINT'));
 
 function handleSignal(message) {
-  return function() {
+  console.log('handleSignal', message)
+  return function () {
     // if we are already disconnecting don't do anything
     if (cluster.disconnecting) return;
 
@@ -220,7 +223,7 @@ function handleSignal(message) {
     cluster.disconnecting = true;
 
     // dive workers just a bit more time to die on their own
-    var killTimer = setTimeout(function() {
+    var killTimer = setTimeout(function () {
       for (var id in cluster.workers) {
         var worker = cluster.workers[id];
         worker.process.kill('SIGKILL');
@@ -231,7 +234,7 @@ function handleSignal(message) {
     if (killTimer.unref) killTimer.unref();
 
     // all of the workers disconnected
-    cluster.disconnect(function(){
+    cluster.disconnect(function () {
       console.log('Shutting down master');
       clearTimeout(killTimer);
     });
@@ -239,7 +242,7 @@ function handleSignal(message) {
 };
 
 if (program.workerRotation) {
-  setInterval(function() {
+  setInterval(function () {
     if (cluster.disconnecting) return;
     var worker = currentWorkers.shift();
     worker.process.kill('SIGTERM');
